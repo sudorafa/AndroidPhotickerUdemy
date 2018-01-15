@@ -16,6 +16,8 @@ import utils.ImageUtil;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final ViewHolder mViewHolder = new ViewHolder();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         final RelativeLayout relativeLayout = (RelativeLayout) this.findViewById(R.id.relative_photo_content_draw);
         final LinearLayout content = (LinearLayout) this.findViewById(R.id.linear_horizontal_scroll);
 
-        for(Integer imageId : mListImages){
+        for (Integer imageId : mListImages) {
             ImageView image = new ImageView(this);
             image.setImageBitmap(ImageUtil.decodeSampledBitmapFromResource(getResources(), imageId, 70, 70));
             image.setPadding(20, 10, 20, 10);
@@ -47,10 +49,13 @@ public class MainActivity extends AppCompatActivity {
             content.addView(image);
         }
 
+        this.mViewHolder.mLinearSharePanel = (LinearLayout) this.findViewById(R.id.linear_share_panel);
+        this.mViewHolder.mLinearControlPanel = (LinearLayout) this.findViewById(R.id.linear_control_panel);
+
     }
 
     private View.OnClickListener onClickImageOption(final RelativeLayout relativeLayout, final Integer imageId, final int width, final int height) {
-        return new View.OnClickListener(){
+        return new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -61,7 +66,25 @@ public class MainActivity extends AppCompatActivity {
                 RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) image.getLayoutParams();
                 layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
                 layoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
+
+                toobleControlePanel(true);
             }
         };
+    }
+
+    private void toobleControlePanel(boolean showControls) {
+        if (showControls) {
+            this.mViewHolder.mLinearControlPanel.setVisibility(View.VISIBLE);
+            this.mViewHolder.mLinearSharePanel.setVisibility(View.GONE);
+        }else{
+            this.mViewHolder.mLinearControlPanel.setVisibility(View.GONE);
+            this.mViewHolder.mLinearSharePanel.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private static class ViewHolder {
+
+        LinearLayout mLinearSharePanel;
+        LinearLayout mLinearControlPanel;
     }
 }
