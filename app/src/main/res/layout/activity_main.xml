@@ -17,19 +17,19 @@
             android:id="@+id/linear_horizontal_scroll"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center_horizontal"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
         </LinearLayout>
 
     </HorizontalScrollView>
 
-    <view
+    <View
         android:layout_width="match_parent"
         android:layout_height="5dp"
         android:background="@color/colorAccent" />
 
-    <view
+    <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="@color/colorPrimary" />
@@ -68,12 +68,12 @@
 
     </RelativeLayout>
 
-    <view
+    <View
         android:layout_width="match_parent"
         android:layout_height="5dp"
         android:background="@color/colorAccent" />
 
-    <view
+    <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="@color/colorPrimary" />
