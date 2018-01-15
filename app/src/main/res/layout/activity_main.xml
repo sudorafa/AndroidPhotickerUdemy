@@ -115,7 +115,7 @@
             android:src="@drawable/face" />
 
         <ImageView
-            android:id="@+id/whatssapp"
+            android:id="@+id/image_whatsapp"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
@@ -153,7 +153,7 @@
             android:src="@drawable/zoom_out" />
 
         <ImageView
-            android:id="@+id/imge_rotate_left"
+            android:id="@+id/image_rotate_left"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
@@ -161,7 +161,7 @@
             android:src="@drawable/rotate_left" />
 
         <ImageView
-            android:id="@+id/imge_rotate_right"
+            android:id="@+id/image_rotate_right"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
@@ -169,7 +169,7 @@
             android:src="@drawable/rotate_right" />
 
         <ImageView
-            android:id="@+id/imge_finish"
+            android:id="@+id/image_finish"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
@@ -177,7 +177,7 @@
             android:src="@drawable/finish" />
 
         <ImageView
-            android:id="@+id/imge_remove"
+            android:id="@+id/image_remove"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"

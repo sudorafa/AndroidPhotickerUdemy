@@ -14,9 +14,11 @@ import java.util.List;
 
 import utils.ImageUtil;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private final ViewHolder mViewHolder = new ViewHolder();
+
+    private ImageView mImageSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
         List<Integer> mListImages = ImageUtil.getImageList();
 
-        final RelativeLayout relativeLayout = (RelativeLayout) this.findViewById(R.id.relative_photo_content_draw);
+        this.mViewHolder.mRelativePhotoContent = (RelativeLayout) this.findViewById(R.id.relative_photo_content_draw);
         final LinearLayout content = (LinearLayout) this.findViewById(R.id.linear_horizontal_scroll);
 
         for (Integer imageId : mListImages) {
@@ -44,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
             final int width = dimensions.outWidth;
             final int height = dimensions.outHeight;
 
-            image.setOnClickListener(onClickImageOption(relativeLayout, imageId, width, height));
+            image.setOnClickListener(onClickImageOption(this.mViewHolder.mRelativePhotoContent, imageId, width, height));
 
             content.addView(image);
         }
@@ -52,6 +54,24 @@ public class MainActivity extends AppCompatActivity {
         this.mViewHolder.mLinearSharePanel = (LinearLayout) this.findViewById(R.id.linear_share_panel);
         this.mViewHolder.mLinearControlPanel = (LinearLayout) this.findViewById(R.id.linear_control_panel);
 
+        this.mViewHolder.mButtonZoomIn = (ImageView) this.findViewById(R.id.image_zoom_in);
+        this.mViewHolder.mButtonZoomOut = (ImageView) this.findViewById(R.id.image_zoom_out);
+        this.mViewHolder.mButtonRotateLeft = (ImageView) this.findViewById(R.id.image_rotate_left);
+        this.mViewHolder.mButtonRotateRight = (ImageView) this.findViewById(R.id.image_rotate_right);
+        this.mViewHolder.mImageFinish = (ImageView) this.findViewById(R.id.image_finish);
+        this.mViewHolder.mImageRemove = (ImageView) this.findViewById(R.id.image_remove);
+
+        this.setListeners();
+
+    }
+
+    private void setListeners() {
+        this.findViewById(R.id.image_zoom_in).setOnClickListener(this);
+        this.findViewById(R.id.image_zoom_out).setOnClickListener(this);
+        this.findViewById(R.id.image_rotate_left).setOnClickListener(this);
+        this.findViewById(R.id.image_rotate_right).setOnClickListener(this);
+        this.findViewById(R.id.image_finish).setOnClickListener(this);
+        this.findViewById(R.id.image_remove).setOnClickListener(this);
     }
 
     private View.OnClickListener onClickImageOption(final RelativeLayout relativeLayout, final Integer imageId, final int width, final int height) {
@@ -67,12 +87,14 @@ public class MainActivity extends AppCompatActivity {
                 layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
                 layoutParams.addRule(RelativeLayout.CENTER_VERTICAL);
 
-                toobleControlePanel(true);
+                toogleControlPanel(true);
+
+                mImageSelected = image;
             }
         };
     }
 
-    private void toobleControlePanel(boolean showControls) {
+    private void toogleControlPanel(boolean showControls) {
         if (showControls) {
             this.mViewHolder.mLinearControlPanel.setVisibility(View.VISIBLE);
             this.mViewHolder.mLinearSharePanel.setVisibility(View.GONE);
@@ -82,9 +104,47 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.image_zoom_in:
+                ImageUtil.handleZoomIn(this.mImageSelected);
+                break;
+
+            case R.id.image_zoom_out:
+                ImageUtil.handleZoomOut(this.mImageSelected);
+                break;
+
+            case R.id.image_rotate_left:
+                ImageUtil.handleRotateLeft(this.mImageSelected);
+                break;
+
+            case R.id.image_rotate_right:
+                ImageUtil.handleRotateRight(this.mImageSelected);
+                break;
+
+            case R.id.image_finish:
+                toogleControlPanel(false);
+                break;
+
+            case R.id.image_remove:
+                this.mViewHolder.mRelativePhotoContent.removeView(this.mImageSelected);
+                toogleControlPanel(false);
+                break;
+        }
+    }
+
     private static class ViewHolder {
+
+        ImageView mButtonZoomIn;
+        ImageView mButtonZoomOut;
+        ImageView mButtonRotateLeft;
+        ImageView mButtonRotateRight;
+        ImageView mImageFinish;
+        ImageView mImageRemove;
 
         LinearLayout mLinearSharePanel;
         LinearLayout mLinearControlPanel;
+        RelativeLayout mRelativePhotoContent;
     }
 }
