@@ -1,7 +1,10 @@
 package com.devmasterteam.photicker.views;
 
+import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -11,14 +14,18 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.devmasterteam.photicker.R;
-import com.devmasterteam.photicker.utils.LongEventType;
 
+import utils.LongEventType;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import utils.ImageUtil;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, View.OnTouchListener {
 
+    private static final int REQUEST_TAKE_PHOTO = 2;
     private final ViewHolder mViewHolder = new ViewHolder();
     private Handler mRepeatUpdateHandler = new Handler();
 
@@ -72,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setListeners() {
+        this.findViewById(R.id.image_take_photo).setOnClickListener(this);
         this.findViewById(R.id.image_zoom_in).setOnClickListener(this);
         this.findViewById(R.id.image_zoom_out).setOnClickListener(this);
         this.findViewById(R.id.image_rotate_left).setOnClickListener(this);
@@ -142,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (showControls) {
             this.mViewHolder.mLinearControlPanel.setVisibility(View.VISIBLE);
             this.mViewHolder.mLinearSharePanel.setVisibility(View.GONE);
-        }else{
+        } else {
             this.mViewHolder.mLinearControlPanel.setVisibility(View.GONE);
             this.mViewHolder.mLinearSharePanel.setVisibility(View.VISIBLE);
         }
@@ -151,6 +159,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.image_take_photo:
+                dispatchTakePictureIntent();
+
+                break;
             case R.id.image_zoom_in:
                 ImageUtil.handleZoomIn(this.mImageSelected);
                 break;
@@ -175,6 +187,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 this.mViewHolder.mRelativePhotoContent.removeView(this.mImageSelected);
                 toogleControlPanel(false);
                 break;
+        }
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        // Certifica que a Activity da camera existe e consegue responder
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+
+            // Cria o arquivo onde a foto será salva
+            File photoFile = null;
+            try {
+                photoFile = ImageUtil.createImageFile(this);
+                // Save a file: path for use with ACTION_VIEW intents
+                this.mViewHolder.mUriPhotoPath = Uri.fromFile(photoFile);
+            } catch (IOException ex) {
+
+            }
+
+            // Continua somente se teve sucesso na criação do arquivo
+            if (photoFile != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
         }
     }
 
@@ -226,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LinearLayout mLinearSharePanel;
         LinearLayout mLinearControlPanel;
         RelativeLayout mRelativePhotoContent;
+        public Uri mUriPhotoPath;
     }
 
     private class RptUpdater implements Runnable {
