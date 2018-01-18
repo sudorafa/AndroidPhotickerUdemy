@@ -1,4 +1,4 @@
-package utils;
+package com.devmasterteam.photicker.utils;
 
 /**
  * Created by oRafa on 18/01/2018.

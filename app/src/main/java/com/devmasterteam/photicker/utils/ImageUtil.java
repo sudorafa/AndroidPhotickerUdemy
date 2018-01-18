@@ -1,4 +1,4 @@
-package utils;
+package com.devmasterteam.photicker.utils;
 
 import android.content.Context;
 import android.content.res.Resources;

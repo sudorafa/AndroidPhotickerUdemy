@@ -1,10 +1,15 @@
 package com.devmasterteam.photicker.views;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -14,14 +19,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.devmasterteam.photicker.R;
+import com.devmasterteam.photicker.utils.PermissionUtil;
 
-import utils.LongEventType;
+import com.devmasterteam.photicker.utils.LongEventType;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import utils.ImageUtil;
+import com.devmasterteam.photicker.utils.ImageUtil;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, View.OnTouchListener {
 
@@ -35,6 +41,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //se não colocar isso dar erro,
+        //https://stackoverflow.com/questions/42251634/android-os-fileuriexposedexception-file-jpg-exposed-beyond-app-through-clipdata/45569709#45569709
+        
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -160,7 +173,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.image_take_photo:
-                dispatchTakePictureIntent();
+                if (!PermissionUtil.hasCameraPermission(this)) {
+                    PermissionUtil.asksCameraPermission(this);
+                } else {
+                    dispatchTakePictureIntent();
+                }
 
                 break;
             case R.id.image_zoom_in:
@@ -187,6 +204,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 this.mViewHolder.mRelativePhotoContent.removeView(this.mImageSelected);
                 toogleControlPanel(false);
                 break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PermissionUtil.CAMERA_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                dispatchTakePictureIntent();
+            } else {
+                new AlertDialog.Builder(this)
+                        .setMessage(getString(R.string.without_permission_camera_explanation))
+                        .setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            }
+                        }).show();
+            }
         }
     }
 
