@@ -1,6 +1,7 @@
 package com.devmasterteam.photicker.views;
 
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -10,16 +11,20 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.devmasterteam.photicker.R;
+import com.devmasterteam.photicker.utils.LongEventType;
 
 import java.util.List;
 
 import utils.ImageUtil;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, View.OnTouchListener {
 
     private final ViewHolder mViewHolder = new ViewHolder();
+    private Handler mRepeatUpdateHandler = new Handler();
 
     private ImageView mImageSelected;
+    private boolean mAutoIncrement = false;
+    private LongEventType mLongEventType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +78,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.findViewById(R.id.image_rotate_right).setOnClickListener(this);
         this.findViewById(R.id.image_finish).setOnClickListener(this);
         this.findViewById(R.id.image_remove).setOnClickListener(this);
+
+        this.findViewById(R.id.image_zoom_in).setOnLongClickListener(this);
+        this.findViewById(R.id.image_zoom_out).setOnLongClickListener(this);
+        this.findViewById(R.id.image_rotate_left).setOnLongClickListener(this);
+        this.findViewById(R.id.image_rotate_right).setOnLongClickListener(this);
+
+        this.findViewById(R.id.image_zoom_in).setOnTouchListener(this);
+        this.findViewById(R.id.image_zoom_out).setOnTouchListener(this);
+        this.findViewById(R.id.image_rotate_left).setOnTouchListener(this);
+        this.findViewById(R.id.image_rotate_right).setOnTouchListener(this);
     }
 
     private View.OnClickListener onClickImageOption(final RelativeLayout relativeLayout, final Integer imageId, final int width, final int height) {
@@ -163,6 +178,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    public boolean onLongClick(View v) {
+        if (v.getId() == R.id.image_zoom_in) {
+            mAutoIncrement = true;
+            this.mLongEventType = LongEventType.ZoomIn;
+            new RptUpdater().run();
+        } else if (v.getId() == R.id.image_zoom_out) {
+            mAutoIncrement = true;
+            this.mLongEventType = LongEventType.ZoomOut;
+            new RptUpdater().run();
+        } else if (v.getId() == R.id.image_rotate_left) {
+            mAutoIncrement = true;
+            this.mLongEventType = LongEventType.RotateLeft;
+            new RptUpdater().run();
+        } else if (v.getId() == R.id.image_rotate_right) {
+            mAutoIncrement = true;
+            this.mLongEventType = LongEventType.RotateRight;
+            new RptUpdater().run();
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        int id = v.getId();
+        if (id == R.id.image_zoom_in || id == R.id.image_zoom_out || id == R.id.image_rotate_left || id == R.id.image_rotate_right) {
+
+            if (event.getAction() == MotionEvent.ACTION_UP && mAutoIncrement) {
+                mAutoIncrement = false;
+                this.mLongEventType = null;
+            }
+        }
+        return false;
+    }
+
     private static class ViewHolder {
 
         ImageView mButtonZoomIn;
@@ -175,5 +226,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         LinearLayout mLinearSharePanel;
         LinearLayout mLinearControlPanel;
         RelativeLayout mRelativePhotoContent;
+    }
+
+    private class RptUpdater implements Runnable {
+        public void run() {
+
+            // Se o usuário ainda estiver pressionando o botão
+            if (mAutoIncrement)
+                mRepeatUpdateHandler.postDelayed(new RptUpdater(), 50);
+
+            // Verifica o tipo de evento e toma a ação
+            if (mLongEventType != null) {
+                switch (mLongEventType) {
+                    case ZoomIn:
+                        ImageUtil.handleZoomIn(mImageSelected);
+                        break;
+                    case ZoomOut:
+                        ImageUtil.handleZoomOut(mImageSelected);
+                        break;
+                    case RotateLeft:
+                        ImageUtil.handleRotateLeft(mImageSelected);
+                        break;
+                    case RotateRight:
+                        ImageUtil.handleRotateRight(mImageSelected);
+                        break;
+                }
+            }
+        }
     }
 }
