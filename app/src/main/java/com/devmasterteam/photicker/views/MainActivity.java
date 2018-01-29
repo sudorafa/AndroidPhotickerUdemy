@@ -237,8 +237,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bmOptions.inSampleSize = scaleFactor;
 
         Bitmap bitmap = BitmapFactory.decodeFile(this.mViewHolder.mUriPhotoPath.getPath(), bmOptions);
+        Bitmap bitmapRotated = ImageUtil.rotateImageIfRequired(bitmap, this.mViewHolder.mUriPhotoPath);
 
-        this.mViewHolder.mImagePhoto.setImageBitmap(bitmap);
+        this.mViewHolder.mImagePhoto.setImageBitmap(bitmapRotated);
     }
 
     @Override
