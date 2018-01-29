@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Handler;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //se não colocar isso dar erro,
         //https://stackoverflow.com/questions/42251634/android-os-fileuriexposedexception-file-jpg-exposed-beyond-app-through-clipdata/45569709#45569709
-        
+
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
 
@@ -76,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             content.addView(image);
         }
+
+        this.mViewHolder.mImagePhoto = (ImageView) this.findViewById(R.id.image_photo);
 
         this.mViewHolder.mLinearSharePanel = (LinearLayout) this.findViewById(R.id.linear_share_panel);
         this.mViewHolder.mLinearControlPanel = (LinearLayout) this.findViewById(R.id.linear_control_panel);
@@ -208,6 +211,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK){
+            this.setPhotoAsBackground();
+        }
+    }
+
+    private void setPhotoAsBackground() {
+
+        int targetW = this.mViewHolder.mImagePhoto.getWidth();
+        int targetH = this.mViewHolder.mImagePhoto.getHeight();
+
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        //não ocupae memoria
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(this.mViewHolder.mUriPhotoPath.getPath(), bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determina o quanto dimensionar a imagem
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+        // Decodifica a imagem em um arquivo de imagem para preencher a View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(this.mViewHolder.mUriPhotoPath.getPath(), bmOptions);
+
+        this.mViewHolder.mImagePhoto.setImageBitmap(bitmap);
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionUtil.CAMERA_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -286,6 +320,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private static class ViewHolder {
+
+        ImageView mImagePhoto;
 
         ImageView mButtonZoomIn;
         ImageView mButtonZoomOut;
